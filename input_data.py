@@ -3,6 +3,26 @@ from PIL import Image
 import numpy as np
 
 
+class DataSet:
+    def __init__(self, xs, ys):
+        self._xs = xs
+        self._ys = ys
+
+        self.ptr = 0
+
+    @property
+    def images(self):
+        return self._xs
+
+    @property
+    def labels(self):
+        return self._ys
+
+    def next_batch(self, size=100):
+        self.ptr += size
+        return self._xs[self.ptr - size: self.ptr]
+
+
 def load_image(filename, size=None):
     im = Image.open(filename).convert('L')
     data = np.asarray(im)
@@ -31,6 +51,22 @@ def load_data_set(dir_name, size=60*100, ext='.png'):
     return np.vstack(images), np.vstack(labels)
 
 
+def load_one_char(data_dir):
+    train_dir = os.path.join(data_dir, 'train')
+    test_dir = os.path.join(data_dir, 'test')
+    return (
+        DataSet(*load_data_set(train_dir)),
+        DataSet(*load_data_set(test_dir)),
+    )
+
+
 if __name__ == '__main__':
-    images, labels = load_data_set('images/one-char/train')
-    print images.shape, labels.shape
+    train_data, test_data = load_one_char('images/one-char')
+
+    print 'train data'
+    print train_data.images.shape
+    print train_data.labels.shape
+
+    print 'test data'
+    print test_data.images.shape
+    print test_data.labels.shape
