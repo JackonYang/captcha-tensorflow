@@ -8,6 +8,8 @@ class DataSet:
         self._xs = xs
         self._ys = ys
 
+        self._num_examples = xs.shape[0]
+
         self.ptr = 0
 
     @property
@@ -18,7 +20,16 @@ class DataSet:
     def labels(self):
         return self._ys
 
-    def next_batch(self, size=100):
+    def next_batch(self, size=100, shuffle=True):
+
+        if self.ptr == 0:
+            if shuffle:
+                print 'shuffling'
+                perm = np.arange(self._num_examples)
+                np.random.shuffle(perm)
+                self._images = self.images[perm]
+                self._labels = self.labels[perm]
+
         self.ptr += size
         return (
             self._xs[self.ptr - size: self.ptr],
