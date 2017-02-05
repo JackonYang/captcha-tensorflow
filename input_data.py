@@ -21,6 +21,8 @@ class DataSet:
         return self._ys
 
     def next_batch(self, size=100, shuffle=True):
+        if self.ptr + size > self._num_examples:
+            self.ptr = 0
 
         if self.ptr == 0:
             if shuffle:
