@@ -32,9 +32,11 @@ def main(_):
     tf.global_variables_initializer().run()
 
     # Train
-    for _ in range(100):
+    for _ in range(1000):
+        # if _ and _ % 100 == 0:
+        #     print _
         batch_xs, batch_ys = train_data.next_batch(100)
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
     # Test trained model
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
