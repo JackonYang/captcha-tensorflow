@@ -20,7 +20,10 @@ class DataSet:
 
     def next_batch(self, size=100):
         self.ptr += size
-        return self._xs[self.ptr - size: self.ptr]
+        return (
+            self._xs[self.ptr - size: self.ptr],
+            self._ys[self.ptr - size: self.ptr],
+        )
 
 
 def load_image(filename, size=None):
@@ -64,9 +67,11 @@ if __name__ == '__main__':
     train_data, test_data = load_one_char('images/one-char')
 
     print 'train data'
-    print train_data.images.shape
-    print train_data.labels.shape
+    print train_data.images.shape, train_data.labels.shape
 
     print 'test data'
-    print test_data.images.shape
-    print test_data.labels.shape
+    print test_data.images.shape, test_data.labels.shape
+
+    print 'batch data'
+    batch_xs, batch_ys = train_data.next_batch(20)
+    print batch_xs.shape, batch_ys.shape
