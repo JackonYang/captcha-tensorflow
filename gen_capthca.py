@@ -15,4 +15,5 @@ def one_char(loop=1000, img_dir='images'):
 
 
 if __name__ == '__main__':
-    one_char()
+    one_char(1000, 'images/one-char/train')
+    one_char(200, 'images/one-char/test')
