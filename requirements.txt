@@ -1,4 +1,2 @@
 captcha==0.2.1
 Pillow==4.0.0
-
-tensorflow==0.12.1
