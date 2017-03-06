@@ -28,21 +28,21 @@ def main(_):
         tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
 
-    sess = tf.InteractiveSession()
-    tf.global_variables_initializer().run()
+    with tf.Session() as sess:
+        tf.global_variables_initializer().run()
 
-    # Train
-    for _ in range(1000):
-        # if _ and _ % 100 == 0:
-        #     print _
-        batch_xs, batch_ys = train_data.next_batch(100)
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+        # Train
+        for _ in range(10000):
+            batch_xs, batch_ys = train_data.next_batch(1000)
+            sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
-    # Test trained model
-    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print(sess.run(accuracy, feed_dict={x: test_data.images,
-                                        y_: test_data.labels}))
+            if _ % 10 == 0:
+                # Test trained model
+                correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+                r = sess.run(accuracy, feed_dict={x: test_data.images,
+                                                  y_: test_data.labels})
+                print 'step %s: %s' % (_, r)
 
 
 if __name__ == '__main__':
