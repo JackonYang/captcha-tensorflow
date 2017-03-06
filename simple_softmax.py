@@ -36,13 +36,15 @@ def main(_):
             batch_xs, batch_ys = train_data.next_batch(1000)
             sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
-            if _ % 10 == 0:
+            if _ % 100 == 0:
                 # Test trained model
-                correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+                correct_prediction = tf.equal(tf.argmax(y, 1),
+                                              tf.argmax(y_, 1))
+                accuracy = tf.reduce_mean(
+                    tf.cast(correct_prediction, tf.float32))
                 r = sess.run(accuracy, feed_dict={x: test_data.images,
                                                   y_: test_data.labels})
-                print 'step %s: %s' % (_, r)
+                print 'step %s: %.2f%%' % (_, r * 100)
 
 
 if __name__ == '__main__':

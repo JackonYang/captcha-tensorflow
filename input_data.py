@@ -26,7 +26,6 @@ class DataSet:
 
         if self.ptr == 0:
             if shuffle:
-                print 'shuffling'
                 perm = np.arange(self._num_examples)
                 np.random.shuffle(perm)
                 self._images = self.images[perm]
