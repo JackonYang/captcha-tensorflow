@@ -1,5 +1,6 @@
 import argparse
 import sys
+import numpy as np
 
 import input_data
 
@@ -21,6 +22,9 @@ def main(_):
     W = tf.Variable(tf.zeros([image_px, y_len]))
     b = tf.Variable(tf.zeros([y_len]))
     y = tf.matmul(x, W) + b
+
+    # forword prop
+    predict = tf.argmax(y, axis=1)
 
     # Define loss and optimizer
     y_ = tf.placeholder(tf.float32, [None, y_len])
@@ -44,7 +48,11 @@ def main(_):
                     tf.cast(correct_prediction, tf.float32))
                 r = sess.run(accuracy, feed_dict={x: test_data.images,
                                                   y_: test_data.labels})
-                print 'step %s: %.2f%%' % (_, r * 100)
+                print 'step = %s, accuracy = %.2f%%' % (_, r * 100)
+
+                a = sess.run(predict, feed_dict={x: test_data.images[-10:]})
+                print 'predict: %s' % a
+                print 'expect : %s ' % np.argmax(test_data.labels[-10:], axis=1)
 
 
 if __name__ == '__main__':
