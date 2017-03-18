@@ -46,9 +46,17 @@ def main(_):
         tf.summary.image('input', images_shaped_input, LABEL_SIZE)
 
     # define the model
-    W = tf.Variable(tf.zeros([IMAGE_SIZE, LABEL_SIZE]))
-    b = tf.Variable(tf.zeros([LABEL_SIZE]))
-    y = tf.matmul(x, W) + b
+    # Adding a name scope ensures logical grouping of the layers in the graph.
+    with tf.name_scope('softmax_linear'):
+        with tf.name_scope('W'):
+            W = tf.Variable(tf.zeros([IMAGE_SIZE, LABEL_SIZE]))
+            variable_summaries(W)
+        with tf.name_scope('b'):
+            b = tf.Variable(tf.zeros([LABEL_SIZE]))
+            variable_summaries(b)
+        with tf.name_scope('y'):
+            y = tf.matmul(x, W) + b
+            tf.summary.histogram('y', y)
 
     # Define loss and optimizer
     diff = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y)
