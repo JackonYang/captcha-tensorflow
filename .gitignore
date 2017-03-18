@@ -2,6 +2,7 @@
 
 
 images/*
+log/*
 
 # self defined
 db.sqlite3
