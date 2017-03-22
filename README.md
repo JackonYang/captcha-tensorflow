@@ -78,3 +78,28 @@ sys0m170m23.968s
 ```
 
 不仅慢了，而且 accuracy 浮动很大。
+
+
+#### tensorboard
+
+
+基本的原理：
+
+tensorflow 执行时，写 log 文件，
+tensorboard 解析 log 并做数据可视化。
+
+定义 graph 的时候，
+用 tf.summary 定义需要写入日志的变量值和格式。
+
+代码：`softmax_with_log.py`
+
+
+```bash
+$ python softmax_with_log.py
+```
+
+在另外 1 个 terminal 中执行
+
+```bash
+$ tensorboard --logdir=log
+```
