@@ -103,3 +103,10 @@ $ python softmax_with_log.py
 ```bash
 $ tensorboard --logdir=log
 ```
+
+浏览器中打开 `http://127.0.0.1:6006/`
+
+![](img-doc/m1-softmax-accuracy.png)
+![](img-doc/m1-softmax-loss.png)
+![](img-doc/m1-image-preview.png)
+![](img-doc/m1-histograms.png)
