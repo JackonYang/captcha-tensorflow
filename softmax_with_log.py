@@ -40,14 +40,17 @@ def main(_):
     with tf.name_scope('input'):
         x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
         y_ = tf.placeholder(tf.float32, [None, LABEL_SIZE])
+        variable_summaries(x)
+        variable_summaries(y_)
 
     with tf.name_scope('input_reshape'):
+        # must be 4-D with shape `[batch_size, height, width, channels]`
         images_shaped_input = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
-        tf.summary.image('input', images_shaped_input, LABEL_SIZE)
+        tf.summary.image('input', images_shaped_input, max_outputs=LABEL_SIZE)
 
     # define the model
     # Adding a name scope ensures logical grouping of the layers in the graph.
-    with tf.name_scope('softmax_linear'):
+    with tf.name_scope('linear_model'):
         with tf.name_scope('W'):
             W = tf.Variable(tf.zeros([IMAGE_SIZE, LABEL_SIZE]))
             variable_summaries(W)
@@ -59,17 +62,23 @@ def main(_):
             tf.summary.histogram('y', y)
 
     # Define loss and optimizer
-    diff = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y)
-    cross_entropy = tf.reduce_mean(diff)
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    # Returns:
+    # A 1-D `Tensor` of length `batch_size`
+    # of the same type as `logits` with the softmax cross entropy loss.
+    with tf.name_scope('loss'):
+        diff = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y)
+        train_step = tf.train.GradientDescentOptimizer(0.5).minimize(tf.reduce_mean(diff))
+        variable_summaries(diff)
 
     # forword prop
     predict = tf.argmax(y, axis=1)
     expect = tf.argmax(y_, axis=1)
 
     # evaluate accuracy
-    correct_prediction = tf.equal(predict, expect)
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    with tf.name_scope('evaluate_accuracy'):
+        correct_prediction = tf.equal(predict, expect)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        variable_summaries(accuracy)
 
     with tf.Session() as sess:
 
@@ -81,18 +90,20 @@ def main(_):
         # Train
         for i in range(MAX_STEPS):
             batch_xs, batch_ys = train_data.next_batch(BATCH_SIZE)
-            summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys})
-            train_writer.add_summary(summary, i)
+            train_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys})
+            train_writer.add_summary(train_summary, i)
 
             if i % 100 == 0:
                 # Test trained model
-                r = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
+                test_summary, r = sess.run([merged, accuracy], feed_dict={x: test_data.images, y_: test_data.labels})
+                train_writer.add_summary(test_summary, i)
                 print 'step = %s, accuracy = %.2f%%' % (i, r * 100)
 
         train_writer.close()
 
         # final check after looping
-        r_test = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
+        test_summary, r_test = sess.run([merged, accuracy], feed_dict={x: test_data.images, y_: test_data.labels})
+        train_writer.add_summary(test_summary, i)
         print 'testing accuracy = %.2f%%' % (r_test * 100, )
 
 
