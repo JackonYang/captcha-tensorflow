@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import argparse
+import datetime
 import sys
 import tensorflow as tf
 
@@ -13,7 +14,7 @@ LABEL_SIZE = 10  # range(0, 10)
 MAX_STEPS = 10000
 BATCH_SIZE = 100
 
-LOG_DIR = 'log'
+LOG_DIR = 'log/run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 FLAGS = None
 
