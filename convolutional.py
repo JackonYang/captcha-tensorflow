@@ -11,8 +11,8 @@ IMAGE_HEIGHT = 100
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 LABEL_SIZE = 10  # range(0, 10)
 
-MAX_STEPS = 10000
-BATCH_SIZE = 100
+MAX_STEPS = 20000
+BATCH_SIZE = 50
 
 LOG_DIR = 'log/cnn1-run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -24,12 +24,12 @@ def variable_summaries(var):
     with tf.name_scope('summaries'):
         mean = tf.reduce_mean(var)
         tf.summary.scalar('mean', mean)
-        with tf.name_scope('stddev'):
-            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-        tf.summary.scalar('stddev', stddev)
-        tf.summary.scalar('max', tf.reduce_max(var))
-        tf.summary.scalar('min', tf.reduce_min(var))
-        tf.summary.histogram('histogram', var)
+        # with tf.name_scope('stddev'):
+        #    stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        # tf.summary.scalar('stddev', stddev)
+        # tf.summary.scalar('max', tf.reduce_max(var))
+        # tf.summary.scalar('min', tf.reduce_min(var))
+        # tf.summary.histogram('histogram', var)
 
 
 def weight_variable(shape):
@@ -96,16 +96,18 @@ def main(_):
         W_fc2 = weight_variable([1024, LABEL_SIZE])
         b_fc2 = bias_variable([LABEL_SIZE])
 
-        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+        y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
     # Define loss and optimizer
     # Returns:
     # A 1-D `Tensor` of length `batch_size`
     # of the same type as `logits` with the softmax cross entropy loss.
     with tf.name_scope('loss'):
-        diff = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)
-        train_step = tf.train.AdamOptimizer(1e-4).minimize(tf.reduce_mean(diff))
-        variable_summaries(diff)
+        cross_entropy = tf.reduce_mean(
+            -tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+        # tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+        variable_summaries(cross_entropy)
 
     # forword prop
     predict = tf.argmax(y_conv, axis=1)
@@ -127,22 +129,22 @@ def main(_):
         # Train
         for i in range(MAX_STEPS):
             batch_xs, batch_ys = train_data.next_batch(BATCH_SIZE)
-            train_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.9})
-            train_writer.add_summary(train_summary, i)
+
+            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.9})
+            train_writer.add_summary(step_summary, i)
 
             if i % 100 == 0:
                 # Test trained model
-                test_summary, r = sess.run([merged, accuracy], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
-                train_writer.add_summary(test_summary, i)
-                print 'step = %s, accuracy = %.2f%%' % (i, r * 100)
+                valid_summary, train_accuracy = sess.run([merged, accuracy], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
+                train_writer.add_summary(valid_summary, i)
+                print 'step %s, training accuracy = %.2f%%' % (i, train_accuracy * 100)
 
         train_writer.close()
 
         # final check after looping
-        test_xs, test_ys = test_data.next_batch(1000)
-        test_summary, r_test = sess.run([merged, accuracy], feed_dict={x: test_xs, y_: test_ys, keep_prob: 1.0})
-        train_writer.add_summary(test_summary, i)
-        print 'testing accuracy = %.2f%%' % (r_test * 100, )
+        test_x, test_y = test_data.next_batch(10000)
+        test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
+        print 'testing accuracy = %.2f%%' % (test_accuracy * 100, )
 
 
 if __name__ == '__main__':
