@@ -110,3 +110,12 @@ $ tensorboard --logdir=log
 ![](img-doc/m1-softmax-loss.png)
 ![](img-doc/m1-image-preview.png)
 ![](img-doc/m1-histograms.png)
+
+
+#### 2 层 Convolutional 网络: 正确率 10%
+
+作为对比，在 mnist 数据集上，跑出了 98%+ 的正确率。
+
+在验证码的数据集上，基本在 10% 左右 -- 恰好等于随机蒙的概率。
+
+![](img-doc/m2-cnn-accuracy.png)
