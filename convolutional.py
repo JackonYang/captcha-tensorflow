@@ -14,7 +14,7 @@ LABEL_SIZE = 10  # range(0, 10)
 MAX_STEPS = 10000
 BATCH_SIZE = 100
 
-LOG_DIR = 'log/run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+LOG_DIR = 'log/cnn1-run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 FLAGS = None
 
@@ -37,6 +37,11 @@ def weight_variable(shape):
     return tf.Variable(initial)
 
 
+def bias_variable(shape):
+    initial = tf.constant(0.1, shape=shape)
+    return tf.Variable(initial)
+
+
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
@@ -44,11 +49,6 @@ def conv2d(x, W):
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
                           strides=[1, 2, 2, 1], padding='SAME')
-
-
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
 
 
 def main(_):
@@ -61,20 +61,19 @@ def main(_):
         x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
         y_ = tf.placeholder(tf.float32, [None, LABEL_SIZE])
 
-    with tf.name_scope('input_reshape'):
         # must be 4-D with shape `[batch_size, height, width, channels]`
         x_image = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
         tf.summary.image('input', x_image, max_outputs=LABEL_SIZE)
 
     # define the model
-    with tf.name_scope('layer-1'):
+    with tf.name_scope('convolution-layer-1'):
         W_conv1 = weight_variable([5, 5, 1, 32])
         b_conv1 = bias_variable([32])
 
         h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
         h_pool1 = max_pool_2x2(h_conv1)
 
-    with tf.name_scope('layer-2'):
+    with tf.name_scope('convolution-layer-2'):
         W_conv2 = weight_variable([5, 5, 32, 64])
         b_conv2 = bias_variable([64])
 
