@@ -104,8 +104,8 @@ def main(_):
     # of the same type as `logits` with the softmax cross entropy loss.
     with tf.name_scope('loss'):
         cross_entropy = tf.reduce_mean(
-            -tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
-        # tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)
+            # -tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+            tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
         train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
         variable_summaries(cross_entropy)
 
@@ -130,7 +130,7 @@ def main(_):
         for i in range(MAX_STEPS):
             batch_xs, batch_ys = train_data.next_batch(BATCH_SIZE)
 
-            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.9})
+            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
             train_writer.add_summary(step_summary, i)
 
             if i % 100 == 0:
@@ -142,7 +142,7 @@ def main(_):
         train_writer.close()
 
         # final check after looping
-        test_x, test_y = test_data.next_batch(10000)
+        test_x, test_y = test_data.next_batch(2000)
         test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
         print 'testing accuracy = %.2f%%' % (test_accuracy * 100, )
 
