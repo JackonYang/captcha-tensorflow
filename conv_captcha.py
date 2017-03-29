@@ -47,7 +47,7 @@ def conv2d(x, W):
 
 
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+    return tf.nn.avg_pool(x, ksize=[1, 8, 8, 1],
                           strides=[1, 2, 2, 1], padding='SAME')
 
 
@@ -67,17 +67,17 @@ def main(_):
 
     # define the model
     with tf.name_scope('convolution-layer-1'):
-        W_conv1 = weight_variable([5, 5, 1, 32])
+        W_conv1 = weight_variable([7, 7, 1, 32])
         b_conv1 = bias_variable([32])
 
-        h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+        h_conv1 = tf.nn.tanh(conv2d(x_image, W_conv1) + b_conv1)
         h_pool1 = max_pool_2x2(h_conv1)
 
     with tf.name_scope('convolution-layer-2'):
-        W_conv2 = weight_variable([5, 5, 32, 64])
+        W_conv2 = weight_variable([7, 7, 32, 64])
         b_conv2 = bias_variable([64])
 
-        h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+        h_conv2 = tf.nn.tanh(conv2d(h_pool1, W_conv2) + b_conv2)
         h_pool2 = max_pool_2x2(h_conv2)
 
     with tf.name_scope('densely-connected'):
@@ -85,7 +85,7 @@ def main(_):
         b_fc1 = bias_variable([1024])
 
         h_pool2_flat = tf.reshape(h_pool2, [-1, IMAGE_WIDTH*IMAGE_HEIGHT*4])
-        h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+        h_fc1 = tf.nn.tanh(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     with tf.name_scope('dropout'):
         # To reduce overfitting, we will apply dropout before the readout layer
@@ -123,6 +123,7 @@ def main(_):
 
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter(LOG_DIR + '/train', sess.graph)
+        test_writer = tf.summary.FileWriter(LOG_DIR + '/test', sess.graph)
 
         tf.global_variables_initializer().run()
 
@@ -130,16 +131,23 @@ def main(_):
         for i in range(MAX_STEPS):
             batch_xs, batch_ys = train_data.next_batch(BATCH_SIZE)
 
-            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
             train_writer.add_summary(step_summary, i)
 
             if i % 100 == 0:
                 # Test trained model
                 valid_summary, train_accuracy = sess.run([merged, accuracy], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
                 train_writer.add_summary(valid_summary, i)
-                print 'step %s, training accuracy = %.2f%%' % (i, train_accuracy * 100)
+
+                # final check after looping
+                test_x, test_y = test_data.next_batch(2000)
+                test_summary, test_accuracy = sess.run([merged, accuracy], feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
+                train_writer.add_summary(test_summary, i)
+
+                print 'step %s, training accuracy = %.2f%%, testing accuracy = %.2f%%' % (i, train_accuracy * 100, test_accuracy * 100)
 
         train_writer.close()
+        test_writer.close()
 
         # final check after looping
         test_x, test_y = test_data.next_batch(2000)
