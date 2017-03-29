@@ -3,6 +3,8 @@ import os
 from PIL import Image
 import numpy as np
 
+from gen_captcha import CHOICES
+
 IMAGE_SIZE_1CHAR = 60 * 100  # width * height
 
 
@@ -71,11 +73,11 @@ def load_image(filename, size=None):
     return data
 
 
-def load_label(filename, size=10):
+def load_label(filename):
     basename = os.path.basename(filename)
-    num = int(basename.split('_')[0])
-    data = np.zeros(size)
-    data[num] = 1
+    idx = CHOICES.index(basename.split('_')[0])
+    data = np.zeros(len(CHOICES))
+    data[idx] = 1
     return data
 
 
