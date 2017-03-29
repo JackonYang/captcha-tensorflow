@@ -9,7 +9,7 @@ import input_data
 IMAGE_WIDTH = 60
 IMAGE_HEIGHT = 100
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-LABEL_SIZE = 10  # range(0, 10)
+LABEL_SIZE = 36
 
 MAX_STEPS = 20000
 BATCH_SIZE = 50
@@ -47,7 +47,7 @@ def conv2d(x, W):
 
 
 def max_pool_2x2(x):
-    return tf.nn.avg_pool(x, ksize=[1, 8, 8, 1],
+    return tf.nn.avg_pool(x, ksize=[1, 5, 5, 1],
                           strides=[1, 2, 2, 1], padding='SAME')
 
 
@@ -142,7 +142,7 @@ def main(_):
                 # final check after looping
                 test_x, test_y = test_data.next_batch(2000)
                 test_summary, test_accuracy = sess.run([merged, accuracy], feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
-                train_writer.add_summary(test_summary, i)
+                test_writer.add_summary(test_summary, i)
 
                 print 'step %s, training accuracy = %.2f%%, testing accuracy = %.2f%%' % (i, train_accuracy * 100, test_accuracy * 100)
 
