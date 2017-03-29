@@ -6,7 +6,7 @@ import uuid
 from captcha.image import ImageCaptcha
 
 
-CHOICES = list(range(10)) + list(string.ascii_lowercase)
+CHOICES = map(str, list(range(10)) + list(string.ascii_lowercase))
 
 
 def one_char(n=1000, img_dir='images'):
