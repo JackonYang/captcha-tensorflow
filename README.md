@@ -13,7 +13,7 @@
 图片大小为 60 * 100 (width * height)
 
 ```bash
-$ python gen_capthca.py
+$ python gen_captcha.py
 generating 1000 captchas in images/one-char/train
 generating 200 captchas in images/one-char/test
 ```
@@ -22,7 +22,7 @@ generating 200 captchas in images/one-char/test
 比如：10000 组训练数据，30% 比例的测试数据。
 
 ```bash
-$ python gen_capthca.py -n 10000 -t 0.3
+$ python gen_captcha.py -n 10000 -t 0.3
 ```
 
 
@@ -31,7 +31,7 @@ $ python gen_capthca.py -n 10000 -t 0.3
 生成测试数据, 10000 组
 
 ```bash
-$ python gen_capthca.py -n 10000
+$ python gen_captcha.py -n 10000
 generating 10000 captchas in images/one-char/train
 generating 2000 captchas in images/one-char/test
 ```
