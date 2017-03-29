@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import argparse
+import datetime
 import sys
 import tensorflow as tf
 
@@ -13,7 +14,7 @@ LABEL_SIZE = 10  # range(0, 10)
 MAX_STEPS = 10000
 BATCH_SIZE = 100
 
-LOG_DIR = 'log'
+LOG_DIR = 'log/regression-run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 FLAGS = None
 
@@ -43,7 +44,6 @@ def main(_):
         variable_summaries(x)
         variable_summaries(y_)
 
-    with tf.name_scope('input_reshape'):
         # must be 4-D with shape `[batch_size, height, width, channels]`
         images_shaped_input = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
         tf.summary.image('input', images_shaped_input, max_outputs=LABEL_SIZE)
