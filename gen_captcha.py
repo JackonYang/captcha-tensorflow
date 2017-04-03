@@ -7,7 +7,19 @@ from captcha.image import ImageCaptcha
 
 import itertools
 
+FLAGS = None
+
 CHOICES = map(str, list(range(10)) + list(string.ascii_lowercase))
+
+
+def get_choices():
+    cate_map = [
+        (FLAGS.digit, map(str, range(10))),
+        (FLAGS.lower, string.ascii_lowercase),
+        (FLAGS.upper, string.ascii_uppercase),
+        ]
+    return tuple([i for _flag, choices in cate_map for i in choices if _flag])
+
 
 def one_char(n=1000, img_dir='images'):
     if not os.path.exists(img_dir):
@@ -22,30 +34,19 @@ def one_char(n=1000, img_dir='images'):
             image.write(str(i), fn)
 
 
-def _gen_captcha(n=1000, num_per_image=1, img_dir='images', d=True, l=False, u=False):
+def _gen_captcha(n=1000, num_per_image=1, img_dir='images', choices=[]):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
     image = ImageCaptcha(width=40 + 20 * num_per_image, height=100)
     print 'generating %s captchas in %s' % (n, img_dir)
 
-    if not (d or l or u):
-        print 'Digit, lower case and upper case cannot be all False.'
-        return
-    else:
-        label_list = []
-        if d:
-            label_list = label_list + list(range(10))
-        if l:
-            label_list = label_list + list(string.ascii_lowercase)
-        if u:
-            label_list = label_list + list(string.ascii_uppercase)
-        label_set = map(str, label_list)
-        for _ in range(n):
-            for i in itertools.permutations(label_set, num_per_image):
-                captcha = ''.join(i)
-                fn = os.path.join(img_dir, '%s_%s.png' % (captcha, uuid.uuid4()))
-                image.write(captcha, fn)
+    for _ in range(n):
+        for i in itertools.permutations(choices, num_per_image):
+            captcha = ''.join(i)
+            fn = os.path.join(img_dir, '%s_%s.png' % (captcha, uuid.uuid4()))
+            image.write(captcha, fn)
+
 
 if __name__ == '__main__':
 
@@ -61,19 +62,16 @@ if __name__ == '__main__':
         type=float,
         help='ratio of test / train.')
     parser.add_argument(
-        '-d',
-        default=True,
-        type=bool,
+        '-d', '--digit',
+        action='store_true',
         help='use digits in labels.')
     parser.add_argument(
-        '-l',
-        default=False,
-        type=bool,
+        '-l', '--lower',
+        action='store_true',
         help='use lowercase characters in labels.')
     parser.add_argument(
-        '-u',
-        default=False,
-        type=bool,
+        '-u', '--upper',
+        action='store_true',
         help='use uppercase characters in labels.')
     parser.add_argument(
         '--npi',
@@ -85,12 +83,10 @@ if __name__ == '__main__':
 
     train_number = FLAGS.n
     test_number = int(FLAGS.n * FLAGS.t)
-    digit = FLAGS.d
-    lower = FLAGS.l
-    upper = FLAGS.u
-    num_per_image=FLAGS.npi
+    num_per_image = FLAGS.npi
 
-    _gen_captcha(n=train_number, num_per_image=num_per_image,
-            img_dir='images/char'+str(num_per_image)+'/train', d=digit, l=lower, u=upper)
-    _gen_captcha(n=test_number, num_per_image=num_per_image,
-            img_dir='images/char'+str(num_per_image)+'/test', d=digit, l=lower, u=upper)
+    a = get_choices()
+    print len(a)
+    print a
+    # _gen_captcha(n=train_number, num_per_image=num_per_image, img_dir='images/char'+str(num_per_image)+'/train', choices=get_choices())
+    # _gen_captcha(n=test_number, num_per_image=num_per_image, img_dir='images/char'+str(num_per_image)+'/test', choices=get_choices())
