@@ -29,7 +29,7 @@ def _gen_captcha(img_dir, num_per_image, n, choices):
         os.makedirs(img_dir)
 
     image = ImageCaptcha(width=40 + 20 * num_per_image, height=100)
-    print 'generating %s captchas in %s' % (n, img_dir)
+    print 'generating %s groups of captchas in %s' % (n, img_dir)
 
     for _ in range(n):
         for i in itertools.permutations(choices, num_per_image):
@@ -40,12 +40,12 @@ def _gen_captcha(img_dir, num_per_image, n, choices):
 
 def gen_dataset(root_dir):
 
-    def _build_path(x):
-        return os.path.join(root_dir, 'char-%s' % num_per_image, x)
-
     n_train = FLAGS.n
     n_test = max(int(FLAGS.n * FLAGS.t), 1)
     num_per_image = FLAGS.npi
+
+    def _build_path(x):
+        return os.path.join(root_dir, 'char-%s-groups-%s' % (num_per_image, n_train), x)
 
     choices = get_choices()
 
