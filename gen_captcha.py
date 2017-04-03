@@ -9,8 +9,6 @@ import itertools
 
 FLAGS = None
 
-CHOICES = map(str, list(range(10)) + list(string.ascii_lowercase))
-
 
 def get_choices():
     cate_map = [
@@ -21,20 +19,7 @@ def get_choices():
     return tuple([i for _flag, choices in cate_map for i in choices if _flag])
 
 
-def one_char(n=1000, img_dir='images'):
-    if not os.path.exists(img_dir):
-        os.makedirs(img_dir)
-
-    image = ImageCaptcha(width=60, height=100)
-    print 'generating %s captchas in %s' % (n, img_dir)
-
-    for _ in range(n):
-        for i in CHOICES:
-            fn = os.path.join(img_dir, '%s_%s.png' % (i, uuid.uuid4()))
-            image.write(str(i), fn)
-
-
-def _gen_captcha(n=1000, num_per_image=1, img_dir='images', choices=[]):
+def _gen_captcha(img_dir, num_per_image, n, choices):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
@@ -48,12 +33,30 @@ def _gen_captcha(n=1000, num_per_image=1, img_dir='images', choices=[]):
             image.write(captcha, fn)
 
 
+def gen_dataset(root_dir):
+
+    def _build_path(x):
+        return os.path.join(root_dir, 'char-%s' % num_per_image, x)
+
+    n_train = FLAGS.n
+    n_test = max(int(FLAGS.n * FLAGS.t), 1)
+    num_per_image = FLAGS.npi
+
+    choices = get_choices()
+
+    print '%s choices: %s' % (len(choices), ''.join(choices) or None)
+
+    _gen_captcha(_build_path('train'), num_per_image, n_train, choices=choices)
+    _gen_captcha(_build_path('test'), num_per_image, n_test, choices=choices)
+    # meta info
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-n',
-        default=1000,
+        default=1,
         type=int,
         help='number of captchas for one integer.')
     parser.add_argument(
@@ -81,12 +84,4 @@ if __name__ == '__main__':
 
     FLAGS, unparsed = parser.parse_known_args()
 
-    train_number = FLAGS.n
-    test_number = int(FLAGS.n * FLAGS.t)
-    num_per_image = FLAGS.npi
-
-    a = get_choices()
-    print len(a)
-    print a
-    # _gen_captcha(n=train_number, num_per_image=num_per_image, img_dir='images/char'+str(num_per_image)+'/train', choices=get_choices())
-    # _gen_captcha(n=test_number, num_per_image=num_per_image, img_dir='images/char'+str(num_per_image)+'/test', choices=get_choices())
+    gen_dataset('images')
