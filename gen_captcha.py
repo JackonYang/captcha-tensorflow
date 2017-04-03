@@ -64,17 +64,17 @@ if __name__ == '__main__':
         '-d',
         default=True,
         type=bool,
-        help='digits as labels.')
+        help='use digits in labels.')
     parser.add_argument(
         '-l',
-        default=True,
+        default=False,
         type=bool,
-        help='lower case chars as labels.')
+        help='use lowercase characters in labels.')
     parser.add_argument(
         '-u',
-        default=True,
+        default=False,
         type=bool,
-        help='upper case chars as labels.')
+        help='use uppercase characters in labels.')
     parser.add_argument(
         '--npi',
         default=1,
@@ -82,6 +82,7 @@ if __name__ == '__main__':
         help='number of characters per image.')
 
     FLAGS, unparsed = parser.parse_known_args()
+
     train_number = FLAGS.n
     test_number = int(FLAGS.n * FLAGS.t)
     digit = FLAGS.d
