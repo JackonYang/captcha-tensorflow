@@ -1,13 +1,16 @@
 # -*- coding:utf-8 -*-
 import argparse
+import json
 import string
 import os
+import shutil
 import uuid
 from captcha.image import ImageCaptcha
 
 import itertools
 
 FLAGS = None
+META_FILENAME = 'meta.json'
 
 
 def get_choices():
@@ -20,6 +23,8 @@ def get_choices():
 
 
 def _gen_captcha(img_dir, num_per_image, n, choices):
+    if os.path.exists(img_dir):
+        shutil.rmtree(img_dir)
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
@@ -44,11 +49,22 @@ def gen_dataset(root_dir):
 
     choices = get_choices()
 
+    # meta info
+    meta = {
+        'num_per_image': num_per_image,
+        'label_size': len(choices),
+        'label_choices': choices,
+        'n_train': n_train,
+        'n_test': n_test,
+    }
+
     print '%s choices: %s' % (len(choices), ''.join(choices) or None)
 
     _gen_captcha(_build_path('train'), num_per_image, n_train, choices=choices)
     _gen_captcha(_build_path('test'), num_per_image, n_test, choices=choices)
-    # meta info
+
+    with open(_build_path(META_FILENAME), 'wb') as f:
+        json.dump(meta, f, indent=4)
 
 
 if __name__ == '__main__':
