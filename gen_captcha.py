@@ -100,4 +100,4 @@ if __name__ == '__main__':
 
     FLAGS, unparsed = parser.parse_known_args()
 
-    gen_dataset('images')
+    gen_dataset(root_dir='images')
