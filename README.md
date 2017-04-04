@@ -2,28 +2,73 @@
 
 使用 tensorflow 做验证码识别
 
+## 训练数据
 
-## 1 个字符的验证码识别
+每一个 dataset 分 train 和 test 2 个目录存放图片数据。
+根目录下的 meta.json 存放参数信息。
+
+meta.json 的例子
+
+```javascript
+{
+    "num_per_image": 1,
+    "n_train": 1,
+    "label_choices": "0123456789",
+    "n_test": 1,
+    "width": 60,
+    "height": 100,
+    "label_size": 10
+}
+```
+
+图片的例子
+
+![](img-doc/data-set-example.png)
 
 
-#### 生成训练数据
+#### 生成
 
 使用 python 的 captcha package 生成测试数据
 
-图片大小为 60 * 100 (width * height)
+查看用法说明
 
 ```bash
-$ python gen_captcha.py
-generating 1000 captchas in images/one-char/train
-generating 200 captchas in images/one-char/test
+$ python gen_captcha.py -h
+usage: gen_captcha.py [-h] [-n N] [-t T] [-d] [-l] [-u] [--npi NPI]
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -n N         number of captchas permutations
+  -t T         ratio of test / train.
+  -d, --digit  use digits in labels.
+  -l, --lower  use lowercase characters in labels.
+  -u, --upper  use uppercase characters in labels.
+  --npi NPI    number of characters per image.
 ```
 
-也可以自定义数据规模，
-比如：10000 组训练数据，30% 比例的测试数据。
+例如，生成包含数字 + 小写字母的验证码，每张图片包含 2 个字符，
+10 组训练数据，另外生成 10% 的测试数据
 
 ```bash
-$ python gen_captcha.py -n 10000 -t 0.3
+$ python gen_captcha.py -dl --npi 2 -n 10 -t 0.1
+36 choices: 0123456789abcdefghijklmnopqrstuvwxyz
+generating 10 groups of captchas in images/char-2-groups-10/train
+generating 1 groups of captchas in images/char-2-groups-10/test
+write meta info in images/char-2-groups-10/meta.json
 ```
+
+用时约 1 min。生成的图片数量如下
+
+```bash
+$ ls images/char-2-groups-10/train | wc -l
+   12600
+$ ls images/char-2-groups-10/test/ | wc -l
+    1260
+```
+
+
+## 1 个字符的验证码识别
+
 
 
 #### Simple-softmax: 1 个字符，1 个 softmax 层，正确率 90%
