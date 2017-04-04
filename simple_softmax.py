@@ -5,8 +5,6 @@ import tensorflow as tf
 
 import input_data
 
-IMAGE_SIZE = 60 * 100  # width * height
-LABEL_SIZE = 10  # range(0, 10)
 
 MAX_STEPS = 10000
 BATCH_SIZE = 1000
@@ -16,8 +14,13 @@ FLAGS = None
 
 def main(_):
     # load data
-    train_data, test_data = input_data.load_data_1char(FLAGS.data_dir)
-    print 'data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=True)
+    print 'data loaded'
+    print 'train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+
+    LABEL_SIZE = meta['label_size']
+    IMAGE_SIZE = meta['width'] * meta['height']
+    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
 
     # variable in the graph for input data
     x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
@@ -60,7 +63,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/one-char',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
