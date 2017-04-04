@@ -70,22 +70,21 @@ $ ls images/char-2-groups-10/test/ | wc -l
 ## 1 个字符的验证码识别
 
 
-
 #### Simple-softmax: 1 个字符，1 个 softmax 层，正确率 90%
 
-生成测试数据, 10000 组
+生成测试数据, 1000 组, 纯数字
 
 ```bash
-$ python gen_captcha.py -n 10000
-generating 10000 captchas in images/one-char/train
-generating 2000 captchas in images/one-char/test
+$ python gen_captcha.py -n 1000 -d
 ```
 
 训练
 
 ```bash
 $ time python simple_softmax.py
-data loaded. train images: 10000. test images: 2000
+data loaded
+train images: 10000. test images: 2000
+label_size: 10, image_size: 6000
 ...
 step = 9100, accuracy = 91.10%
 step = 9200, accuracy = 91.40%
@@ -102,27 +101,6 @@ real2m46.478s
 user2m29.704s
 sys0m17.828s
 ```
-
-另外一次运行的输出
-
-```bash
-step = 9100, accuracy = 91.19%
-step = 9200, accuracy = 90.76%
-step = 9300, accuracy = 91.76%
-step = 9400, accuracy = 90.39%
-step = 9500, accuracy = 64.87%
-step = 9600, accuracy = 88.35%
-step = 9700, accuracy = 90.64%
-step = 9800, accuracy = 91.94%
-step = 9900, accuracy = 81.67%
-testing accuracy = 91.35%
-
-real2m463m29.769s
-user2m293m8.040s
-sys0m170m23.968s
-```
-
-不仅慢了，而且 accuracy 浮动很大。
 
 
 #### tensorboard
