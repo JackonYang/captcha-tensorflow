@@ -22,13 +22,13 @@ def get_choices():
     return tuple([i for _flag, choices in cate_map for i in choices if _flag])
 
 
-def _gen_captcha(img_dir, num_per_image, n, choices):
+def _gen_captcha(img_dir, num_per_image, n, width, height, choices):
     if os.path.exists(img_dir):
         shutil.rmtree(img_dir)
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    image = ImageCaptcha(width=40 + 20 * num_per_image, height=100)
+    image = ImageCaptcha(width=width, height=height)
     print 'generating %s groups of captchas in %s' % (n, img_dir)
 
     for _ in range(n):
@@ -44,6 +44,9 @@ def gen_dataset(root_dir):
     n_test = max(int(FLAGS.n * FLAGS.t), 1)
     num_per_image = FLAGS.npi
 
+    width = 40 + 20 * num_per_image
+    height = 100
+
     def _build_path(x):
         return os.path.join(root_dir, 'char-%s-groups-%s' % (num_per_image, n_train), x)
 
@@ -53,18 +56,22 @@ def gen_dataset(root_dir):
     meta = {
         'num_per_image': num_per_image,
         'label_size': len(choices),
-        'label_choices': choices,
+        'label_choices': ''.join(choices),
         'n_train': n_train,
         'n_test': n_test,
+        'width': width,
+        'height': height,
     }
 
     print '%s choices: %s' % (len(choices), ''.join(choices) or None)
 
-    _gen_captcha(_build_path('train'), num_per_image, n_train, choices=choices)
-    _gen_captcha(_build_path('test'), num_per_image, n_test, choices=choices)
+    _gen_captcha(_build_path('train'), num_per_image, n_train, width, height, choices=choices)
+    _gen_captcha(_build_path('test'), num_per_image, n_test, width, height, choices=choices)
 
-    with open(_build_path(META_FILENAME), 'wb') as f:
+    meta_filename = _build_path(META_FILENAME)
+    with open(meta_filename, 'wb') as f:
         json.dump(meta, f, indent=4)
+    print 'write meta info in %s' % meta_filename
 
 
 if __name__ == '__main__':
@@ -74,7 +81,7 @@ if __name__ == '__main__':
         '-n',
         default=1,
         type=int,
-        help='number of captchas for one integer.')
+        help='number of captchas permutations.')
     parser.add_argument(
         '-t',
         default=0.2,
