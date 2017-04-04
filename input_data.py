@@ -5,7 +5,7 @@ import numpy as np
 import json
 
 
-def load_data(data_dir):
+def load_data(data_dir, flatten=False):
     train_dir = os.path.join(data_dir, 'train')
     test_dir = os.path.join(data_dir, 'test')
 
@@ -16,9 +16,9 @@ def load_data(data_dir):
     return (
         meta,
         DataSet(
-            *_read_images_and_labels(train_dir, **meta)),
+            *_read_images_and_labels(train_dir, flatten=flatten, **meta)),
         DataSet(
-            *_read_images_and_labels(test_dir, **meta)),
+            *_read_images_and_labels(test_dir, flatten=flatten, **meta)),
     )
 
 
@@ -58,20 +58,22 @@ class DataSet:
         )
 
 
-def _read_images_and_labels(dir_name, ext='.png', **meta):
+def _read_images_and_labels(dir_name, flatten, ext='.png', **meta):
     images = []
     labels = []
     for fn in os.listdir(dir_name):
         if fn.endswith(ext):
             fd = os.path.join(dir_name, fn)
-            images.append(_read_image(fd, **meta))
+            images.append(_read_image(fd, flatten=flatten, **meta))
             labels.append(_read_lable(fd, **meta))
     return np.array(images), np.array(labels)
 
 
-def _read_image(filename, **extra_meta):
+def _read_image(filename, flatten, width, height, **extra_meta):
     im = Image.open(filename).convert('L')
     data = np.asarray(im)
+    if flatten:
+        return data.reshape(width * height)
     return data
 
 
@@ -83,10 +85,11 @@ def _read_lable(filename, label_choices, **extra_meta):
     return data
 
 
-if __name__ == '__main__':
-    meta, train_data, test_data = load_data('images/char-1-groups-1000/')
-
-    print meta
+def display_info(meta, train_data, test_data):
+    print '=' * 20
+    for k, v in meta.items():
+        print '%s: %s' % (k, v)
+    print '=' * 20
 
     print 'train images: %s, labels: %s' % (train_data.images.shape, train_data.labels.shape)
 
@@ -94,3 +97,11 @@ if __name__ == '__main__':
 
     batch_xs, batch_ys = train_data.next_batch(100)
     print 'batch images: %s, labels: %s' % (batch_xs.shape, batch_ys.shape)
+
+
+if __name__ == '__main__':
+    ret1 = load_data('images/char-1-groups-1000/')
+    display_info(*ret1)
+
+    ret2 = load_data('images/char-1-groups-1000/', flatten=True)
+    display_info(*ret2)
