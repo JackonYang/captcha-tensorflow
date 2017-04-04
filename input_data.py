@@ -2,18 +2,23 @@
 import os
 from PIL import Image
 import numpy as np
-
-from gen_captcha import CHOICES
-
-IMAGE_SIZE_1CHAR = 60 * 100  # width * height
+import json
 
 
-def load_data_1char(data_dir):
+def load_data(data_dir):
     train_dir = os.path.join(data_dir, 'train')
     test_dir = os.path.join(data_dir, 'test')
+
+    meta_info = os.path.join(data_dir, 'meta.json')
+    with open(meta_info, 'r') as f:
+        meta = json.load(f)
+
     return (
-        DataSet(*_load_data(train_dir, IMAGE_SIZE_1CHAR)),
-        DataSet(*_load_data(test_dir, IMAGE_SIZE_1CHAR)),
+        meta,
+        DataSet(
+            *_read_images_and_labels(train_dir, **meta)),
+        DataSet(
+            *_read_images_and_labels(test_dir, **meta)),
     )
 
 
@@ -53,36 +58,35 @@ class DataSet:
         )
 
 
-def _load_data(dir_name, size=None, ext='.png'):
+def _read_images_and_labels(dir_name, ext='.png', **meta):
     images = []
     labels = []
     for fn in os.listdir(dir_name):
         if fn.endswith(ext):
             fd = os.path.join(dir_name, fn)
-            images.append(load_image(fd, size))
-            labels.append(load_label(fd))
-    return np.vstack(images), np.vstack(labels)
+            images.append(_read_image(fd, **meta))
+            labels.append(_read_lable(fd, **meta))
+    return np.array(images), np.array(labels)
 
 
-def load_image(filename, size=None):
+def _read_image(filename, **extra_meta):
     im = Image.open(filename).convert('L')
     data = np.asarray(im)
-
-    if size:
-        return data.reshape(size)
     return data
 
 
-def load_label(filename):
+def _read_lable(filename, label_choices, **extra_meta):
     basename = os.path.basename(filename)
-    idx = CHOICES.index(basename.split('_')[0])
-    data = np.zeros(len(CHOICES))
+    idx = label_choices.index(basename.split('_')[0])
+    data = np.zeros(len(label_choices))
     data[idx] = 1
     return data
 
 
 if __name__ == '__main__':
-    train_data, test_data = load_data_1char('images/one-char')
+    meta, train_data, test_data = load_data('images/char-1-groups-1000/')
+
+    print meta
 
     print 'train images: %s, labels: %s' % (train_data.images.shape, train_data.labels.shape)
 
