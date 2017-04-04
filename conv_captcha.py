@@ -6,11 +6,6 @@ import tensorflow as tf
 
 import input_data
 
-IMAGE_WIDTH = 60
-IMAGE_HEIGHT = 100
-IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-LABEL_SIZE = 36
-
 MAX_STEPS = 20000
 BATCH_SIZE = 50
 
@@ -53,12 +48,19 @@ def max_pool_2x2(x):
 
 def main(_):
     # load data
-    train_data, test_data = input_data.load_data_1char(FLAGS.data_dir)
-    print 'data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=False)
+    print 'data loaded'
+    print 'train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+
+    LABEL_SIZE = meta['label_size']
+    IMAGE_HEIGHT = meta['height']
+    IMAGE_WIDTH = meta['width']
+    IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
+    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
 
     # variable in the graph for input data
     with tf.name_scope('input'):
-        x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
+        x = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH])
         y_ = tf.placeholder(tf.float32, [None, LABEL_SIZE])
 
         # must be 4-D with shape `[batch_size, height, width, channels]`
@@ -157,7 +159,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/one-char',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
