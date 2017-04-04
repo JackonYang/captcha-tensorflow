@@ -172,6 +172,21 @@ mnist tutorial 里的 convolutional.py 模型，正确率 98%，
 
 把纯数字的改成了英文+数字混合( 36 labels )，训练了两个小时，正确率收敛在 80% 左右。
 
+
+```bash
+step 19100, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19200, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19300, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19400, training accuracy = 100.00%, testing accuracy = 99.60%
+step 19500, training accuracy = 100.00%, testing accuracy = 99.60%
+step 19600, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19700, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19800, training accuracy = 100.00%, testing accuracy = 99.65%
+step 19900, training accuracy = 100.00%, testing accuracy = 99.65%
+testing accuracy = 99.70%
+```
+
+
 调参以后的 accuracy 与 loss 曲线
 
 ![](img-doc/cnn-2layer-accuracy.png)
