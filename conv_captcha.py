@@ -98,7 +98,7 @@ def main(_):
         W_fc2 = weight_variable([1024, LABEL_SIZE])
         b_fc2 = bias_variable([LABEL_SIZE])
 
-        y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
     # Define loss and optimizer
     # Returns:
