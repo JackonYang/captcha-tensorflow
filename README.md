@@ -1,6 +1,81 @@
 # captcha-tensorflow
 
-使用 tensorflow 做验证码识别
+the 1st tensorflow project.
+
+Solve captcha using TensorFlow
+
+
+## Quick Start
+
+#### Simple-softmax: 1 个字符
+
+1. 1 个 softmax 层
+2. 正确率 90%
+3. 10000 张图片，数字 0-9
+4. 训练时间 3min. GTX 1080
+
+
+生成测试数据, 1000 组, 纯数字
+
+```bash
+$ python gen_captcha.py -n 1000 -d
+```
+
+训练
+
+```bash
+$ time python simple_softmax.py
+data loaded
+train images: 10000. test images: 2000
+label_size: 10, image_size: 6000
+...
+step = 9100, accuracy = 91.10%
+step = 9200, accuracy = 91.40%
+step = 9300, accuracy = 92.00%
+step = 9400, accuracy = 91.40%
+step = 9500, accuracy = 91.35%
+step = 9600, accuracy = 90.80%
+step = 9700, accuracy = 91.60%
+step = 9800, accuracy = 91.65%
+step = 9900, accuracy = 90.50%
+testing accuracy = 91.05%
+
+real2m46.478s
+user2m29.704s
+sys0m17.828s
+```
+
+#### tensorboard
+
+
+基本的原理：
+
+tensorflow 执行时，写 log 文件，
+tensorboard 解析 log 并做数据可视化。
+
+定义 graph 的时候，
+用 tf.summary 定义需要写入日志的变量值和格式。
+
+代码：`softmax_with_log.py`
+
+
+```bash
+$ python softmax_with_log.py
+```
+
+在另外 1 个 terminal 中执行
+
+```bash
+$ tensorboard --logdir=log
+```
+
+浏览器中打开 `http://127.0.0.1:6006/`
+
+![](img-doc/m1-softmax-accuracy.png)
+![](img-doc/m1-softmax-loss.png)
+![](img-doc/m1-image-preview.png)
+![](img-doc/m1-histograms.png)
+
 
 ## 训练数据
 
@@ -65,74 +140,6 @@ $ ls images/char-2-groups-10/train | wc -l
 $ ls images/char-2-groups-10/test/ | wc -l
     1260
 ```
-
-
-## 1 个字符的验证码识别
-
-
-#### Simple-softmax: 1 个字符，1 个 softmax 层，正确率 90%
-
-生成测试数据, 1000 组, 纯数字
-
-```bash
-$ python gen_captcha.py -n 1000 -d
-```
-
-训练
-
-```bash
-$ time python simple_softmax.py
-data loaded
-train images: 10000. test images: 2000
-label_size: 10, image_size: 6000
-...
-step = 9100, accuracy = 91.10%
-step = 9200, accuracy = 91.40%
-step = 9300, accuracy = 92.00%
-step = 9400, accuracy = 91.40%
-step = 9500, accuracy = 91.35%
-step = 9600, accuracy = 90.80%
-step = 9700, accuracy = 91.60%
-step = 9800, accuracy = 91.65%
-step = 9900, accuracy = 90.50%
-testing accuracy = 91.05%
-
-real2m46.478s
-user2m29.704s
-sys0m17.828s
-```
-
-
-#### tensorboard
-
-
-基本的原理：
-
-tensorflow 执行时，写 log 文件，
-tensorboard 解析 log 并做数据可视化。
-
-定义 graph 的时候，
-用 tf.summary 定义需要写入日志的变量值和格式。
-
-代码：`softmax_with_log.py`
-
-
-```bash
-$ python softmax_with_log.py
-```
-
-在另外 1 个 terminal 中执行
-
-```bash
-$ tensorboard --logdir=log
-```
-
-浏览器中打开 `http://127.0.0.1:6006/`
-
-![](img-doc/m1-softmax-accuracy.png)
-![](img-doc/m1-softmax-loss.png)
-![](img-doc/m1-image-preview.png)
-![](img-doc/m1-histograms.png)
 
 
 #### 2 层 Convolutional 网络: 正确率 10%
