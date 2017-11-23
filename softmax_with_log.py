@@ -6,10 +6,6 @@ import tensorflow as tf
 
 import input_data
 
-IMAGE_WIDTH = 60
-IMAGE_HEIGHT = 100
-IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-LABEL_SIZE = 10  # range(0, 10)
 
 MAX_STEPS = 10000
 BATCH_SIZE = 100
@@ -34,8 +30,14 @@ def variable_summaries(var):
 
 def main(_):
     # load data
-    train_data, test_data = input_data.load_data_1char(FLAGS.data_dir)
+    meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=True)
     print 'data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+
+    LABEL_SIZE = meta['label_size']
+    IMAGE_WIDTH = meta['width']
+    IMAGE_HEIGHT = meta['height']
+    IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
+    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
 
     # variable in the graph for input data
     with tf.name_scope('input'):
@@ -46,7 +48,7 @@ def main(_):
 
         # must be 4-D with shape `[batch_size, height, width, channels]`
         images_shaped_input = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
-        tf.summary.image('input', images_shaped_input, max_outputs=LABEL_SIZE)
+        tf.summary.image('input', images_shaped_input, max_outputs=LABEL_SIZE*2)
 
     # define the model
     # Adding a name scope ensures logical grouping of the layers in the graph.
@@ -67,7 +69,8 @@ def main(_):
     # of the same type as `logits` with the softmax cross entropy loss.
     with tf.name_scope('loss'):
         diff = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y)
-        train_step = tf.train.GradientDescentOptimizer(0.5).minimize(tf.reduce_mean(diff))
+        cross_entropy = tf.reduce_mean(diff)
+        train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
         variable_summaries(diff)
 
     # forword prop
@@ -109,7 +112,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/one-char',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
