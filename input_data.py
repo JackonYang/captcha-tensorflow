@@ -79,9 +79,16 @@ def _read_image(filename, flatten, width, height, **extra_meta):
 
 def _read_lable(filename, label_choices, **extra_meta):
     basename = os.path.basename(filename)
-    idx = label_choices.index(basename.split('_')[0])
-    data = np.zeros(len(label_choices))
-    data[idx] = 1
+    labels = basename.split('_')[0]
+
+    data = []
+
+    for c in labels:
+        idx = label_choices.index(c)
+        tmp = [0] * len(label_choices)
+        tmp[idx] = 1
+        data.extend(tmp)
+
     return data
 
 
@@ -105,3 +112,6 @@ if __name__ == '__main__':
 
     ret2 = load_data('images/char-1-groups-1000/', flatten=True)
     display_info(*ret2)
+
+    ret3 = load_data('images/char-2-groups-200/')
+    display_info(*ret3)
