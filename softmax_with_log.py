@@ -4,7 +4,7 @@ import datetime
 import sys
 import tensorflow as tf
 
-import input_data
+import datasets.base as input_data
 
 
 MAX_STEPS = 10000
@@ -112,7 +112,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-epoch-2000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)

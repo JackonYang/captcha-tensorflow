@@ -3,7 +3,7 @@ import argparse
 import sys
 import tensorflow as tf
 
-import input_data
+import datasets.base as input_data
 
 
 MAX_STEPS = 10000
@@ -56,6 +56,7 @@ def main(_):
                 # Test trained model
                 r = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
                 print 'step = %s, accuracy = %.2f%%' % (i, r * 100)
+
         # final check after looping
         r_test = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
         print 'testing accuracy = %.2f%%' % (r_test * 100, )
@@ -63,7 +64,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-epoch-2000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
