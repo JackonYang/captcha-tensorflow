@@ -1,32 +1,50 @@
-# captcha-tensorflow
-
-the 1st tensorflow project.
-
-Solve captcha using TensorFlow
+# Captcha Solving Using TensorFlow
 
 
-## Quick Start
+## Introduction
 
-#### Simple-softmax: 1 个字符
+1. Solve captcha using TensorFlow.
+2. Learn CNN and TensorFlow by a practical project.
 
-1. 1 个 softmax 层
-2. 正确率 90%
-3. 10000 张图片，数字 0-9
-4. 训练时间 3min. GTX 1080
+Follow the steps,
+run the code,
+and it works!
+
+There are several more steps to put this prototype on production.
+
+**Ping me for paid technical supports**.
+
+[i@jackon.me](mailto:i@jackon.me)
 
 
-生成测试数据, 1000 组, 纯数字
+## Tutorials for TensorFlow Beginners
+
+this is an introduction to Tensorflow and TensorBoard.
+
+skip this section if you are a experienced user.
+
+#### Simple Softmax Model: 80%+ Accuracy
+
+The dataset is similar to MNIST, The model is also similar to it.
+
+1. Using only 1 softmax layer.
+2. Accuracy: 80%+.
+3. Training data: 20000 images.
+4. Time cost: <3min. using GTX-1080.
 
 ```bash
-$ python gen_captcha.py -n 1000 -d
+# generating test data
+$ python datasets/gen_captcha.py -d --npi 1 -n 2000
+# run the model
+$ python simple_softmax.py images/char-1-epoch-2000/
 ```
 
-训练
+Output While Training:
 
 ```bash
-$ time python simple_softmax.py
+$ time python simple_softmax.py images/char-1-epoch-2000/
 data loaded
-train images: 10000. test images: 2000
+train images: 20000. test images: 4000
 label_size: 10, image_size: 6000
 ...
 step = 9100, accuracy = 91.10%
@@ -45,44 +63,52 @@ user2m29.704s
 sys0m17.828s
 ```
 
-#### tensorboard
+#### TensorBoard
 
+Tensorboard is a suite of visualization tools.
 
-基本的原理：
+Tensorboard can visualize TensorFlow graph, plot quantitative metrics about the execution of your graph, and show additional data like images that pass through it.
 
-tensorflow 执行时，写 log 文件，
-tensorboard 解析 log 并做数据可视化。
+It is really cool and helpful.
 
-定义 graph 的时候，
-用 tf.summary 定义需要写入日志的变量值和格式。
-
-代码：`softmax_with_log.py`
-
-
-```bash
-$ python softmax_with_log.py
-```
-
-在另外 1 个 terminal 中执行
-
-```bash
-$ tensorboard --logdir=log
-```
-
-浏览器中打开 `http://127.0.0.1:6006/`
+some examples:
 
 ![](img-doc/m1-softmax-accuracy.png)
 ![](img-doc/m1-softmax-loss.png)
 ![](img-doc/m1-image-preview.png)
 ![](img-doc/m1-histograms.png)
 
+**How doest it work?**
 
-#### 2 层 Convolutional: 1 个字符
+1. TensorFlow will write necessary info, defined by `tf.summary`, to log files.
+2. TensorBoard will parse the logs and visualize the data.
 
-1. 2 个 Convolutional 层
-2. 正确率 99%
-3. 10000 张图片，数字 0-9
-4. 训练时间 5min. 10k steps，GTX 1080
+Adding `tf.summary` to `simple_softmax.py`, we got `softmax_with_log.py`.
+
+Run the model using the same training dataset
+
+```bash
+$ python softmax_with_log.py images/char-1-epoch-2000/
+```
+
+Launching TensorBoard in a new terminal
+
+```bash
+$ Tensorboard --logdir=log
+```
+
+Navigate your web browser to `http://127.0.0.1:6006/` to view the TensorBoard.
+
+
+## Solve Captcha Using CNN Model
+
+#### 1-char captcha -- also covered in MNIST tutorial.
+
+1. 2 Convolutional layer.
+2. Accuracy: 99%
+3. Training data: 20000 images.
+4. Time cost: <5min. using GTX-1080.
+
 
 ```bash
 $ time python conv_captcha.py
@@ -107,66 +133,92 @@ sys	0m33.492s
 ```
 
 
-## 训练数据
+## Generate DataSet for Training
 
-每一个 dataset 分 train 和 test 2 个目录存放图片数据。
-根目录下的 meta.json 存放参数信息。
+#### Usage
 
-meta.json 的例子
+```bash
+$ python datasets/gen_captcha.py  -h
+usage: gen_captcha.py [-h] [-n N] [-t T] [-d] [-l] [-u] [--npi NPI]
+                      [--data_dir DATA_DIR]
 
-```javascript
-{
-    "num_per_image": 1,
-    "n_train": 1,
-    "label_choices": "0123456789",
-    "n_test": 1,
-    "width": 60,
-    "height": 100,
-    "label_size": 10
-}
+optional arguments:
+  -h, --help           show this help message and exit
+  -n N                 epoch number of character permutations.
+  -t T                 ratio of test dataset.
+  -d, --digit          use digits in dataset.
+  -l, --lower          use lowercase in dataset.
+  -u, --upper          use uppercase in dataset.
+  --npi NPI            number of characters per image.
+  --data_dir DATA_DIR  where data will be saved.
 ```
 
-图片的例子
+examples:
 
 ![](img-doc/data-set-example.png)
 
+#### Example 1: 1 character per captcha, use digits only.
 
-#### 生成
+1 epoch will have 10 images, generate 2000 epoches for training.
 
-使用 python 的 captcha package 生成测试数据
-
-查看用法说明
-
-```bash
-$ python gen_captcha.py -h
-usage: gen_captcha.py [-h] [-n N] [-t T] [-d] [-l] [-u] [--npi NPI]
-
-optional arguments:
-  -h, --help   show this help message and exit
-  -n N         number of captchas permutations
-  -t T         ratio of test / train.
-  -d, --digit  use digits in labels.
-  -l, --lower  use lowercase characters in labels.
-  -u, --upper  use uppercase characters in labels.
-  --npi NPI    number of characters per image.
-```
-
-例如，生成包含数字 + 小写字母的验证码，每张图片包含 2 个字符，
-10 组训练数据，另外生成 10% 的测试数据
+generating the dataset:
 
 ```bash
-$ python gen_captcha.py -dl --npi 2 -n 10 -t 0.1
-36 choices: 0123456789abcdefghijklmnopqrstuvwxyz
-generating 10 groups of captchas in images/char-2-groups-10/train
-generating 1 groups of captchas in images/char-2-groups-10/test
-write meta info in images/char-2-groups-10/meta.json
+$ python datasets/gen_captcha.py -d --npi 1 -n 2000
+10 choices: 0123456789
+generating 2000 epoches of captchas in ./images/char-1-epoch-2000/train
+generating 400 epoches of captchas in ./images/char-1-epoch-2000/test
+write meta info in ./images/char-1-epoch-2000/meta.json
 ```
 
-用时约 1 min。生成的图片数量如下
+preview the dataset:
 
 ```bash
-$ ls images/char-2-groups-10/train | wc -l
-   12600
-$ ls images/char-2-groups-10/test/ | wc -l
-    1260
+$ python datasets/base.py images/char-1-epoch-2000/
+========== Meta Info ==========
+num_per_image: 1
+label_choices: 0123456789
+height: 100
+width: 60
+n_epoch: 2000
+label_size: 10
+==============================
+train images: (20000, 100, 60), labels: (20000, 10)
+test images: (4000, 100, 60), labels: (4000, 10)
 ```
+
+#### Example 2: use digits/lower/upper cases, 2 digit per captcha image
+
+1 epoch will have `62*61=3782` images, generate 10 epoches for training.
+
+generating the dataset:
+
+```bash
+$ python datasets/gen_captcha.py -dlu --npi 2 -n 10
+62 choices: 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+generating 10 epoches of captchas in ./images/char-2-epoch-10/train
+generating 2 epoches of captchas in ./images/char-2-epoch-10/test
+write meta info in ./images/char-2-epoch-10/meta.json
+```
+
+preview the dataset:
+
+```bash
+========== Meta Info ==========
+num_per_image: 2
+label_choices: 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+height: 100
+width: 80
+n_epoch: 10
+label_size: 62
+==============================
+train images: (37820, 100, 80), labels: (37820, 124)
+test images: (7564, 100, 80), labels: (7564, 124)
+```
+
+
+#### Example 2: use digits, 4 chars per captcha image
+
+1 epoch has `10*9*8*7=5040` images, generate 10 epoches for training.
+
+generating the dataset:
