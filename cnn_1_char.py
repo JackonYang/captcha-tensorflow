@@ -4,7 +4,7 @@ import datetime
 import sys
 import tensorflow as tf
 
-import input_data
+import datasets.base as input_data
 
 MAX_STEPS = 10000
 BATCH_SIZE = 50
@@ -112,8 +112,9 @@ def main(_):
         variable_summaries(cross_entropy)
 
     # forword prop
-    predict = tf.argmax(y_conv, axis=1)
-    expect = tf.argmax(y_, axis=1)
+    with tf.name_scope('forword-prop'):
+        predict = tf.argmax(y_conv, axis=1)
+        expect = tf.argmax(y_, axis=1)
 
     # evaluate accuracy
     with tf.name_scope('evaluate_accuracy'):
@@ -159,7 +160,7 @@ def main(_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/char-1-groups-1000/',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-epoch-2000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
