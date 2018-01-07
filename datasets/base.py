@@ -34,13 +34,13 @@ def _read_images_and_labels(dir_name, flatten, ext='.png', **meta):
     return np.array(images), np.array(labels)
 
 
-def _read_image(filename, flatten, **extra_meta):
-    im = Image.open(filename).convert('L')
+def _read_image(filename, flatten, width, height, **extra_meta):
+    im = Image.open(filename).convert('L').resize((width, height), Image.ANTIALIAS)
 
     data = np.asarray(im)
     if flatten:
-        width, height = im.size
         return data.reshape(width * height)
+
     return data
 
 
