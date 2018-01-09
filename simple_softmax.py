@@ -15,12 +15,12 @@ FLAGS = None
 def main(_):
     # load data
     meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=True)
-    print 'data loaded'
-    print 'train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    print('data loaded')
+    print('train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0]))
 
     LABEL_SIZE = meta['label_size']
     IMAGE_SIZE = meta['width'] * meta['height']
-    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
+    print('label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE))
 
     # variable in the graph for input data
     x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
@@ -55,11 +55,11 @@ def main(_):
             if i % 100 == 0:
                 # Test trained model
                 r = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
-                print 'step = %s, accuracy = %.2f%%' % (i, r * 100)
+                print('step = %s, accuracy = %.2f%%' % (i, r * 100))
 
         # final check after looping
         r_test = sess.run(accuracy, feed_dict={x: test_data.images, y_: test_data.labels})
-        print 'testing accuracy = %.2f%%' % (r_test * 100, )
+        print('testing accuracy = %.2f%%' % (r_test * 100, ))
 
 
 if __name__ == '__main__':

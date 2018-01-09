@@ -30,7 +30,7 @@ def _gen_captcha(img_dir, num_per_image, n, width, height, choices):
 
     image = ImageCaptcha(width=width, height=height)
 
-    print 'generating %s epoches of captchas in %s' % (n, img_dir)
+    print('generating %s epoches of captchas in %s' % (n, img_dir))
     for _ in range(n):
         for i in itertools.permutations(choices, num_per_image):
             captcha = ''.join(i)
@@ -62,15 +62,15 @@ def gen_dataset():
         'height': height,
     }
 
-    print '%s choices: %s' % (len(choices), ''.join(choices) or None)
+    print('%s choices: %s' % (len(choices), ''.join(choices) or None))
 
     _gen_captcha(build_file_path('train'), num_per_image, n_epoch, width, height, choices=choices)
     _gen_captcha(build_file_path('test'), num_per_image, max(1, int(n_epoch * test_ratio)), width, height, choices=choices)
 
     meta_filename = build_file_path(META_FILENAME)
-    with open(meta_filename, 'wb') as f:
+    with open(meta_filename, 'w') as f:
         json.dump(meta, f, indent=4)
-    print 'write meta info in %s' % meta_filename
+    print('write meta info in %s' % meta_filename)
 
 
 if __name__ == '__main__':

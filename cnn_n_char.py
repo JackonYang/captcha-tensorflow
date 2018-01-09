@@ -49,15 +49,15 @@ def max_pool_2x2(x):
 def main(_):
     # load data
     meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=False)
-    print 'data loaded'
-    print 'train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    print('data loaded')
+    print('train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0]))
 
     LABEL_SIZE = meta['label_size']
     NUM_PER_IMAGE = meta['num_per_image']
     IMAGE_HEIGHT = meta['height']
     IMAGE_WIDTH = meta['width']
     IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
+    print('label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE))
 
     # variable in the graph for input data
     with tf.name_scope('input'):
@@ -151,7 +151,7 @@ def main(_):
                 test_summary, test_accuracy = sess.run([merged, accuracy], feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
                 test_writer.add_summary(test_summary, i)
 
-                print 'step %s, training accuracy = %.2f%%, testing accuracy = %.2f%%' % (i, train_accuracy * 100, test_accuracy * 100)
+                print('step %s, training accuracy = %.2f%%, testing accuracy = %.2f%%' % (i, train_accuracy * 100, test_accuracy * 100))
 
         train_writer.close()
         test_writer.close()
@@ -159,7 +159,7 @@ def main(_):
         # final check after looping
         test_x, test_y = test_data.next_batch(2000)
         test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
-        print 'testing accuracy = %.2f%%' % (test_accuracy * 100, )
+        print('testing accuracy = %.2f%%' % (test_accuracy * 100, ))
 
 
 if __name__ == '__main__':
