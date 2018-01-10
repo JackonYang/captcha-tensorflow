@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import os
 import argparse
 import datetime
 import sys
@@ -10,6 +11,9 @@ MAX_STEPS = 10000
 BATCH_SIZE = 50
 
 LOG_DIR = 'log/cnn1-run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+MODEL_DIR = '/mnt/data/prod/cnn-captcha-model/'
+MODEL = os.path.join(MODEL_DIR, 'cnn-n.ckpt')
+
 
 FLAGS = None
 
@@ -61,8 +65,8 @@ def main(_):
 
     # variable in the graph for input data
     with tf.name_scope('input'):
-        x = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH])
-        y_ = tf.placeholder(tf.float32, [None, NUM_PER_IMAGE * LABEL_SIZE])
+        x = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH], name='x')
+        y_ = tf.placeholder(tf.float32, [None, NUM_PER_IMAGE * LABEL_SIZE], name='y_')
 
         # must be 4-D with shape `[batch_size, height, width, channels]`
         x_image = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
@@ -92,7 +96,7 @@ def main(_):
 
     with tf.name_scope('dropout'):
         # To reduce overfitting, we will apply dropout before the readout layer
-        keep_prob = tf.placeholder(tf.float32)
+        keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
     with tf.name_scope('readout'):
@@ -117,7 +121,7 @@ def main(_):
 
     # forword prop
     with tf.name_scope('forword-prop'):
-        predict = tf.argmax(y_got_reshaped, axis=2)
+        predict = tf.argmax(y_got_reshaped, axis=2, name='predict')
         expect = tf.argmax(y_expect_reshaped, axis=2)
 
     # evaluate accuracy
@@ -164,8 +168,8 @@ def main(_):
         test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
         print('testing accuracy = %.2f%%' % (test_accuracy * 100, ))
 
-        save_path = saver.save(sess, "./model/cnn-n.ckpt")
-        print("Model saved in file: %s" % save_path)
+        save_path = saver.save(sess, MODEL)
+        print('Model saved in file: %s' % save_path)
 
 
 if __name__ == '__main__':
