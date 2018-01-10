@@ -126,6 +126,9 @@ def main(_):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         variable_summaries(accuracy)
 
+    # Add ops to save and restore all the variables.
+    saver = tf.train.Saver()
+
     with tf.Session() as sess:
 
         merged = tf.summary.merge_all()
@@ -160,6 +163,9 @@ def main(_):
         test_x, test_y = test_data.next_batch(2000)
         test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
         print('testing accuracy = %.2f%%' % (test_accuracy * 100, ))
+
+        save_path = saver.save(sess, "./model/cnn-n.ckpt")
+        print("Model saved in file: %s" % save_path)
 
 
 if __name__ == '__main__':
