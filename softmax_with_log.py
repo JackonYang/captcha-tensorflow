@@ -31,13 +31,13 @@ def variable_summaries(var):
 def main(_):
     # load data
     meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=True)
-    print 'data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    print('data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0]))
 
     LABEL_SIZE = meta['label_size']
     IMAGE_WIDTH = meta['width']
     IMAGE_HEIGHT = meta['height']
     IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-    print 'label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE)
+    print('label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE))
 
     # variable in the graph for input data
     with tf.name_scope('input'):
@@ -100,14 +100,14 @@ def main(_):
                 # Test trained model
                 test_summary, r = sess.run([merged, accuracy], feed_dict={x: test_data.images, y_: test_data.labels})
                 train_writer.add_summary(test_summary, i)
-                print 'step = %s, accuracy = %.2f%%' % (i, r * 100)
+                print('step = %s, accuracy = %.2f%%' % (i, r * 100))
 
         train_writer.close()
 
         # final check after looping
         test_summary, r_test = sess.run([merged, accuracy], feed_dict={x: test_data.images, y_: test_data.labels})
         train_writer.add_summary(test_summary, i)
-        print 'testing accuracy = %.2f%%' % (r_test * 100, )
+        print('testing accuracy = %.2f%%' % (r_test * 100, ))
 
 
 if __name__ == '__main__':

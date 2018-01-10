@@ -112,14 +112,14 @@ class DataSet(object):
 
 
 def display_debug_info(meta, train_data, test_data):
-    print '%s Meta Info %s' % ('=' * 10, '=' * 10)
+    print('%s Meta Info %s' % ('=' * 10, '=' * 10))
     for k, v in meta.items():
-        print '%s: %s' % (k, v)
-    print '=' * 30
+        print('%s: %s' % (k, v))
+    print('=' * 30)
 
-    print 'train images: %s, labels: %s' % (train_data.images.shape, train_data.labels.shape)
+    print('train images: %s, labels: %s' % (train_data.images.shape, train_data.labels.shape))
 
-    print 'test images: %s, labels: %s' % (test_data.images.shape, test_data.labels.shape)
+    print('test images: %s, labels: %s' % (test_data.images.shape, test_data.labels.shape))
 
 
 if __name__ == '__main__':
