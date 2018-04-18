@@ -4,14 +4,9 @@ import datetime
 import sys
 import tensorflow as tf
 
-from tensorflow.examples.tutorials.mnist import input_data
+import datasets.base as input_data
 
-IMAGE_WIDTH = 28
-IMAGE_HEIGHT = 28
-IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
-LABEL_SIZE = 10  # range(0, 10)
-
-MAX_STEPS = 20000
+MAX_STEPS = 10000
 BATCH_SIZE = 50
 
 LOG_DIR = 'log/cnn1-run-%s' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -53,14 +48,21 @@ def max_pool_2x2(x):
 
 def main(_):
     # load data
-    mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
-    train_data, test_data = mnist.train, mnist.test
-    print 'data loaded. train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0])
+    meta, train_data, test_data = input_data.load_data(FLAGS.data_dir, flatten=False)
+    print('data loaded')
+    print('train images: %s. test images: %s' % (train_data.images.shape[0], test_data.images.shape[0]))
+
+    LABEL_SIZE = meta['label_size']
+    NUM_PER_IMAGE = meta['num_per_image']
+    IMAGE_HEIGHT = meta['height']
+    IMAGE_WIDTH = meta['width']
+    IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
+    print('label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE))
 
     # variable in the graph for input data
     with tf.name_scope('input'):
-        x = tf.placeholder(tf.float32, [None, IMAGE_SIZE])
-        y_ = tf.placeholder(tf.float32, [None, LABEL_SIZE])
+        x = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH])
+        y_ = tf.placeholder(tf.float32, [None, NUM_PER_IMAGE * LABEL_SIZE])
 
         # must be 4-D with shape `[batch_size, height, width, channels]`
         x_image = tf.reshape(x, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
@@ -94,10 +96,14 @@ def main(_):
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
     with tf.name_scope('readout'):
-        W_fc2 = weight_variable([1024, LABEL_SIZE])
-        b_fc2 = bias_variable([LABEL_SIZE])
+        W_fc2 = weight_variable([1024, NUM_PER_IMAGE * LABEL_SIZE])
+        b_fc2 = bias_variable([NUM_PER_IMAGE * LABEL_SIZE])
 
-        y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+
+    with tf.name_scope('reshape'):
+        y_expect_reshaped = tf.reshape(y_, [-1, NUM_PER_IMAGE, LABEL_SIZE])
+        y_got_reshaped = tf.reshape(y_conv, [-1, NUM_PER_IMAGE, LABEL_SIZE])
 
     # Define loss and optimizer
     # Returns:
@@ -105,14 +111,14 @@ def main(_):
     # of the same type as `logits` with the softmax cross entropy loss.
     with tf.name_scope('loss'):
         cross_entropy = tf.reduce_mean(
-            # -tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
-            tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+            tf.nn.softmax_cross_entropy_with_logits(labels=y_expect_reshaped, logits=y_got_reshaped))
         train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
         variable_summaries(cross_entropy)
 
     # forword prop
-    predict = tf.argmax(y_conv, axis=1)
-    expect = tf.argmax(y_, axis=1)
+    with tf.name_scope('forword-prop'):
+        predict = tf.argmax(y_got_reshaped, axis=2)
+        expect = tf.argmax(y_expect_reshaped, axis=2)
 
     # evaluate accuracy
     with tf.name_scope('evaluate_accuracy'):
@@ -124,6 +130,7 @@ def main(_):
 
         merged = tf.summary.merge_all()
         train_writer = tf.summary.FileWriter(LOG_DIR + '/train', sess.graph)
+        test_writer = tf.summary.FileWriter(LOG_DIR + '/test', sess.graph)
 
         tf.global_variables_initializer().run()
 
@@ -131,26 +138,33 @@ def main(_):
         for i in range(MAX_STEPS):
             batch_xs, batch_ys = train_data.next_batch(BATCH_SIZE)
 
-            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+            step_summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
             train_writer.add_summary(step_summary, i)
 
             if i % 100 == 0:
                 # Test trained model
                 valid_summary, train_accuracy = sess.run([merged, accuracy], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})
                 train_writer.add_summary(valid_summary, i)
-                print 'step %s, training accuracy = %.2f%%' % (i, train_accuracy * 100)
+
+                # final check after looping
+                test_x, test_y = test_data.next_batch(2000)
+                test_summary, test_accuracy = sess.run([merged, accuracy], feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
+                test_writer.add_summary(test_summary, i)
+
+                print('step %s, training accuracy = %.2f%%, testing accuracy = %.2f%%' % (i, train_accuracy * 100, test_accuracy * 100))
 
         train_writer.close()
+        test_writer.close()
 
         # final check after looping
         test_x, test_y = test_data.next_batch(2000)
         test_accuracy = accuracy.eval(feed_dict={x: test_x, y_: test_y, keep_prob: 1.0})
-        print 'testing accuracy = %.2f%%' % (test_accuracy * 100, )
+        print('testing accuracy = %.2f%%' % (test_accuracy * 100, ))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='images/one-char',
+    parser.add_argument('--data_dir', type=str, default='images/char-1-epoch-2000/',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
