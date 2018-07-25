@@ -97,7 +97,7 @@ $ python softmax_with_log.py images/char-1-epoch-2000/
 Launching TensorBoard in a new terminal
 
 ```bash
-$ Tensorboard --logdir=log
+$ tensorboard --logdir=log
 ```
 
 Navigate your web browser to `http://127.0.0.1:6006/` to view the TensorBoard.
