@@ -58,6 +58,7 @@ def main(_):
     IMAGE_WIDTH = meta['width']
     IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
     print('label_size: %s, image_size: %s' % (LABEL_SIZE, IMAGE_SIZE))
+    print('NUM_PER_IMAGE: %s, IMAGE_HEIGHT: %s, IMAGE_WIDTH: %s' % (NUM_PER_IMAGE, IMAGE_HEIGHT, IMAGE_WIDTH))
 
     # variable in the graph for input data
     with tf.name_scope('input'):
@@ -84,10 +85,11 @@ def main(_):
         h_pool2 = max_pool_2x2(h_conv2)
 
     with tf.name_scope('densely-connected'):
-        W_fc1 = weight_variable([IMAGE_WIDTH * IMAGE_HEIGHT * 4, 1024])
+        dc_size = ((h_pool2.shape[1] * 4) * (h_pool2.shape[2] * 4) * 4).value
+        W_fc1 = weight_variable([dc_size, 1024])
         b_fc1 = bias_variable([1024])
 
-        h_pool2_flat = tf.reshape(h_pool2, [-1, IMAGE_WIDTH*IMAGE_HEIGHT*4])
+        h_pool2_flat = tf.reshape(h_pool2, [-1, dc_size])
         h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     with tf.name_scope('dropout'):
