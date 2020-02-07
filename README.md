@@ -20,89 +20,6 @@ There are several more steps to put this prototype on production.
 [i@jackon.me](mailto:i@jackon.me)
 
 
-## Tutorials for TensorFlow Beginners
-
-this is an introduction to Tensorflow and TensorBoard.
-
-skip this section if you are a experienced user.
-
-#### Simple Softmax Model: 80%+ Accuracy
-
-The dataset is similar to MNIST, The model is also similar to it.
-
-1. Using only 1 softmax layer.
-2. Accuracy: 80%+.
-3. Training data: 20000 images.
-4. Time cost: <3min. using GTX-1080.
-
-```bash
-# generating test data
-$ python datasets/gen_captcha.py -d --npi 1 -n 2000
-# run the model
-$ python simple_softmax.py images/char-1-epoch-2000/
-```
-
-Output While Training:
-
-```bash
-$ time python simple_softmax.py images/char-1-epoch-2000/
-data loaded
-train images: 20000. test images: 4000
-label_size: 10, image_size: 6000
-...
-step = 9100, accuracy = 91.10%
-step = 9200, accuracy = 91.40%
-step = 9300, accuracy = 92.00%
-step = 9400, accuracy = 91.40%
-step = 9500, accuracy = 91.35%
-step = 9600, accuracy = 90.80%
-step = 9700, accuracy = 91.60%
-step = 9800, accuracy = 91.65%
-step = 9900, accuracy = 90.50%
-testing accuracy = 91.05%
-
-real2m46.478s
-user2m29.704s
-sys0m17.828s
-```
-
-#### TensorBoard
-
-Tensorboard is a suite of visualization tools.
-
-Tensorboard can visualize TensorFlow graph, plot quantitative metrics about the execution of your graph, and show additional data like images that pass through it.
-
-It is really cool and helpful.
-
-some examples:
-
-![](img-doc/m1-softmax-accuracy.png)
-![](img-doc/m1-softmax-loss.png)
-![](img-doc/m1-image-preview.png)
-![](img-doc/m1-histograms.png)
-
-**How doest it work?**
-
-1. TensorFlow will write necessary info, defined by `tf.summary`, to log files.
-2. TensorBoard will parse the logs and visualize the data.
-
-Adding `tf.summary` to `simple_softmax.py`, we got `softmax_with_log.py`.
-
-Run the model using the same training dataset
-
-```bash
-$ python softmax_with_log.py images/char-1-epoch-2000/
-```
-
-Launching TensorBoard in a new terminal
-
-```bash
-$ tensorboard --logdir=log
-```
-
-Navigate your web browser to `http://127.0.0.1:6006/` to view the TensorBoard.
-
-
 ## Solve Captcha Using CNN Model
 
 #### 1-char Captcha
@@ -143,45 +60,6 @@ testing accuracy = 97.85%
 real	3m35.217s
 user	3m4.168s
 sys	0m31.036s
-```
-
-#### 2-char Captcha
-
-Add 1 more layer, reshape the output before calculating Loss.
-
-1. Accuracy: 97%
-3. Training data: 45000 images.
-4. Time cost: <5min. using GTX-1080.
-
-```bash
-# generating test data
-$ python datasets/gen_captcha.py -d --npi=2 -n 500
-# run the model
-$ python cnn_n_char.py --data_dir=images/char-2-epoch-500/
-```
-
-Output While Training:
-
-```bash
-$ time python cnn_n_char.py --data_dir=images/char-2-epoch-500/
-data loaded
-train images: 45000. test images: 9000
-label_size: 10, image_size: 8000
-...
-step 9100, training accuracy = 99.00%, testing accuracy = 96.45%
-step 9200, training accuracy = 100.00%, testing accuracy = 97.28%
-step 9300, training accuracy = 100.00%, testing accuracy = 96.75%
-step 9400, training accuracy = 100.00%, testing accuracy = 96.68%
-step 9500, training accuracy = 100.00%, testing accuracy = 96.55%
-step 9600, training accuracy = 100.00%, testing accuracy = 96.40%
-step 9700, training accuracy = 100.00%, testing accuracy = 95.58%
-step 9800, training accuracy = 99.00%, testing accuracy = 96.70%
-step 9900, training accuracy = 99.00%, testing accuracy = 96.68%
-testing accuracy = 97.33%
-
-real	4m49.509s
-user	4m10.980s
-sys	0m34.164s
 ```
 
 #### 4-char Captcha
