@@ -37,11 +37,12 @@ $ python datasets/gen_captcha.py -d --npi=4 -n 6
     - testing images: 9k
 - Accuracy: 87.6%
 
-if we increase the dataset by 10x, the accuracy increase to 98.8%.
+if we increase the dataset by 10x, the accuracy increases to 98.8%.
+we can further increase the accuracy to 99.8% using 1M traning images.
 
 here is the source code and running logs: [captcha-solver-tf2-4digits-AlexNet-98.8.ipynb](captcha-solver-tf2-4digits-AlexNet-98.8.ipynb)
 
-Images, ground truth and predict values:
+Images, Ground Truth and Predicted Values:
 
 ![](img-doc/result-preview-4digits.png)
 
@@ -50,6 +51,10 @@ Accuracy and Loss History:
 ![](img-doc/history-4digits.png)
 
 Model Structure:
+
+- 3 convolutional layers, followed by 2x2 max pooling layer each.
+- 1 flatten layer
+- 2 dense layer
 
 ![](img-doc/model-structure-alexnet-for-4digits.png)
 
