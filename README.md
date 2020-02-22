@@ -44,6 +44,8 @@ here is the source code and running logs: [captcha-solver-tf2-4digits-AlexNet-98
 
 Images, Ground Truth and Predicted Values:
 
+there is 1 predicton error out of the 20 examples below. 9871 -> 9821
+
 ![](img-doc/result-preview-4digits.png)
 
 Accuracy and Loss History:
