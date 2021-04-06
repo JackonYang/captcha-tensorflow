@@ -36,6 +36,8 @@ def _gen_captcha(img_dir, num_per_image, n, width, height, choices):
             captcha = ''.join(i)
             fn = os.path.join(img_dir, '%s_%s.png' % (captcha, uuid.uuid4()))
             image.write(captcha, fn)
+        if n < 20:
+            print('A epoche finished')
 
 
 def build_file_path(x):
