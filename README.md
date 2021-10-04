@@ -147,7 +147,7 @@ test images: (7564, 100, 80), labels: (7564, 124)
 
 #### Example 3: use digits, 4 chars per captcha image
 
-1 epoch has `10*9*8*7=5040` images, generate 10 epoches for training.
+1 epoch has `10*9*8*7=5040` images, generate 6 epoches for training.
 
 generating the dataset:
 
@@ -173,4 +173,13 @@ label_size: 10
 ==============================
 train images: (30240, 100, 120), labels: (30240, 40)
 test images: (5040, 100, 120), labels: (5040, 40)
+```
+
+## Running Jupyter in docker
+
+tensorflow image: [https://hub.docker.com/r/jackon/tensorflow-2.1-gpu](https://hub.docker.com/r/jackon/tensorflow-2.1-gpu)
+
+```bash
+docker pull jackon/tensorflow-2.1-gpu
+docker run -p 8899:8899 -v $(realpath .):/tf/notebooks -t jackon/tensorflow-2.1-gpu
 ```
