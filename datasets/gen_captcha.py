@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import argparse
 import json
+import random
 import string
 import os
 import shutil
@@ -22,7 +23,7 @@ def get_choices():
     return tuple([i for is_selected, subset in choices for i in subset if is_selected])
 
 
-def _gen_captcha(img_dir, num_per_image, n, width, height, choices):
+def _gen_captcha(img_dir, num_per_image, n, width, height, choices, max_images_count):
     if os.path.exists(img_dir):
         shutil.rmtree(img_dir)
     if not os.path.exists(img_dir):
@@ -30,9 +31,18 @@ def _gen_captcha(img_dir, num_per_image, n, width, height, choices):
 
     image = ImageCaptcha(width=width, height=height)
 
-    print('generating %s epoches of captchas in %s' % (n, img_dir))
+    remain_count = max_images_count
+    epoche_count = len(list(itertools.permutations(choices, num_per_image)))
+
+    print('generating %s epoches of captchas in %s.' % (n, img_dir))
+
     for _ in range(n):
-        for i in itertools.permutations(choices, num_per_image):
+        samples = itertools.permutations(choices, num_per_image)
+        if remain_count > 0 and remain_count < epoche_count:
+            print('only %s records used in epoche %s. epoche_count: %s' % (remain_count, _+1, epoche_count))
+            samples = random.sample(list(samples), remain_count)
+
+        for i in samples:
             captcha = ''.join(i)
             fn = os.path.join(img_dir, '%s_%s.png' % (captcha, uuid.uuid4()))
             image.write(captcha, fn)
@@ -48,6 +58,7 @@ def gen_dataset():
     n_epoch = FLAGS.n
     num_per_image = FLAGS.npi
     test_ratio = FLAGS.t
+    max_images_count = FLAGS.c
 
     choices = get_choices()
 
@@ -66,8 +77,10 @@ def gen_dataset():
 
     print('%s choices: %s' % (len(choices), ''.join(choices) or None))
 
-    _gen_captcha(build_file_path('train'), num_per_image, n_epoch, width, height, choices=choices)
-    _gen_captcha(build_file_path('test'), num_per_image, max(1, int(n_epoch * test_ratio)), width, height, choices=choices)
+    _gen_captcha(build_file_path('train'), num_per_image, n_epoch, width, height, choices=choices, max_images_count=max_images_count)
+
+    if test_ratio > 0:
+        _gen_captcha(build_file_path('test'), num_per_image, max(1, int(n_epoch * test_ratio)), width, height, choices=choices, max_images_count=max(1, int(max_images_count * test_ratio)))
 
     meta_filename = build_file_path(META_FILENAME)
     with open(meta_filename, 'w') as f:
@@ -85,8 +98,14 @@ if __name__ == '__main__':
         help='epoch number of character permutations.')
 
     parser.add_argument(
+        '-c',
+        default=0,
+        type=int,
+        help='max count of images to generate. default unlimited')
+
+    parser.add_argument(
         '-t',
-        default=0.2,
+        default=0,
         type=float,
         help='ratio of test dataset.')
 
