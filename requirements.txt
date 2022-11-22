@@ -1,4 +1,4 @@
 captcha==0.3
-Pillow==9.0.1
+Pillow==9.3.0
 seaborn==0.11.1
 # tensorflow==2.1.4
